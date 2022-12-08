@@ -40,10 +40,10 @@ app.post('/users/store', async (req, res) => {
       password === ''
 
     const inputIsString =
-      name === 'string' &&
-      email === 'string' &&
-      phone === 'string' &&
-      password === 'string'
+      typeof name === 'string' &&
+      typeof email === 'string' &&
+      typeof phone === 'string' &&
+      typeof password === 'string'
 
     // check input is string
     if (!error && !inputIsString) {
@@ -96,7 +96,7 @@ app.post('/login', async (req, res) => {
     let message
     let statusCode = 400
     let error = false
-    const isString = email === 'string' && password === 'string'
+    const isString = typeof email === 'string' && typeof password === 'string'
     const isNull = email === '' || password === ''
 
     // check input is string
@@ -217,10 +217,10 @@ app.patch('/users/update/:id', async (req, res) => {
       password === ''
 
     const inputIsString =
-      name === 'string' &&
-      email === 'string' &&
-      phone === 'string' &&
-      password === 'string'
+      typeof name === 'string' &&
+      typeof email === 'string' &&
+      typeof phone === 'string' &&
+      typeof password === 'string'
 
     // check input is string
     if (!inputIsString) {
@@ -455,10 +455,10 @@ app.patch('/recipes/update/:id', async (req, res) => {
       photo === ''
 
     const isString =
-      title === 'string' &&
-      description === 'string' &&
-      ingredients === 'string' &&
-      photo === 'string'
+      typeof title === 'string' &&
+      typeof description === 'string' &&
+      typeof ingredients === 'string' &&
+      typeof photo === 'string'
 
     // check input is string
     if (!error && !isString) {
@@ -661,7 +661,9 @@ app.post('/comments/add', async (req, res) => {
     let statuCode = 400
 
     const isString =
-      userId === 'string' || recipeId === 'string' || comment === 'string'
+      typeof userId === 'string' ||
+      typeof recipeId === 'string' ||
+      typeof comment === 'string'
 
     const isNull =
       userId === '' ||
@@ -742,6 +744,39 @@ app.get('/comments/:id?', async (req, res) => {
   }
 })
 
+// SHOW COMMENTS by recipe_id
+app.get('/comments/recipe/:recipe_id', async (req, res) => {
+  try {
+    const { recipe_id } = req.params // get parameter recipe_id
+    let getComment
+    let message
+    let data = []
+
+    // get comment by id
+    getComment = await db`SELECT * FROM comments WHERE recipe_id = ${recipe_id}`
+
+    // check data
+    if (getComment.length > 0) {
+      message = 'Data retrieved successfully!'
+      data = getComment
+    } else {
+      message = 'There is no data, please try again!'
+    }
+
+    res.status(200).json({
+      status: true,
+      message,
+      data
+    })
+  } catch (error) {
+    res.status(500).json({
+      status: false,
+      message: error?.message ?? error,
+      data: []
+    })
+  }
+})
+
 // UPDATE COMMENT
 app.patch('/comments/update/:id', async (req, res) => {
   try {
@@ -752,7 +787,7 @@ app.patch('/comments/update/:id', async (req, res) => {
     let statusCode = 400
     let error = false
 
-    const inputIsString = comment === 'string'
+    const inputIsString = typeof comment === 'string'
     const inputIsNull = comment === null || comment === ''
 
     // check input is string
@@ -844,7 +879,7 @@ app.post('/recipe-videos/add', async (req, res) => {
     let message
     let statuCode = 400
 
-    const isString = recipeId === 'string' || video === 'string'
+    const isString = typeof recipeId === 'string' || typeof video === 'string'
 
     const isNull =
       recipeId === '' || recipeId === null || video === '' || video === null
@@ -920,6 +955,41 @@ app.get('/recipe-videos/:id?', async (req, res) => {
   }
 })
 
+// SHOW RECiPE_VIDEOS by recipe_id
+// parameter id optional
+app.get('/recipe-videos/recipe/:recipeId', async (req, res) => {
+  try {
+    const { recipeId } = req.params // get parameter id
+    let getVideo
+    let message
+    let data = []
+
+    // get recipe_videos by recipe_id
+    getVideo =
+      await db`SELECT * FROM recipe_videos WHERE recipe_id = ${recipeId}`
+
+    // check data
+    if (getVideo.length > 0) {
+      message = 'Data retrieved successfully!'
+      data = getVideo
+    } else {
+      message = 'There is no data, please try again!'
+    }
+
+    res.status(200).json({
+      status: true,
+      message,
+      data
+    })
+  } catch (error) {
+    res.status(500).json({
+      status: false,
+      message: error?.message ?? error,
+      data: []
+    })
+  }
+})
+
 // UPDATE RECiPE_VIDEOS
 app.patch('/recipe-videos/update/:id', async (req, res) => {
   try {
@@ -930,7 +1000,7 @@ app.patch('/recipe-videos/update/:id', async (req, res) => {
     let statusCode = 400
     let error = false
 
-    const inputIsString = video === 'string'
+    const inputIsString = typeof video === 'string'
     const inputIsNull = video === null || video === ''
 
     // check input is string
@@ -976,7 +1046,7 @@ app.patch('/recipe-videos/update/:id', async (req, res) => {
   }
 })
 
-// DELETE COMMENT
+// DELETE RECiPE_VIDEOS
 app.delete('/recipe-videos/delete/:id', async (req, res) => {
   try {
     const { id } = req.params

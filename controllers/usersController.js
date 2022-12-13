@@ -17,7 +17,7 @@ const getUsers = async (req, res) => {
     }
 
     if (dataUsers.length < 1) {
-      statusCode = 204 // no content
+      statusCode = 400 // no content
       message = 'Data not found!'
     }
 

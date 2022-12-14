@@ -4,9 +4,9 @@ const validateCreate = async (req, res, next) => {
   const rules = new Validator(req.body, {
     userId: 'required',
     title: 'required|minLength:3|maxLength:30',
-    photo: 'required|url',
+    // photo: 'required',
     ingredients: 'required|minLength:5',
-    video: 'required|array',
+    // video: 'required|array',
     description: 'required|minLength:5'
   })
 

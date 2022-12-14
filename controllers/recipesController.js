@@ -1,6 +1,8 @@
 const recipes = require('../models/recipes')
 const users = require('../models/users')
 const recipeVideos = require('../models/recipeVideos')
+const path = require('path')
+const { v4: uuidv4 } = require('uuid')
 
 const getRecipes = async (req, res) => {
   try {
@@ -61,10 +63,32 @@ const createRecipes = async (req, res) => {
       throw { statusCode: 400, message: 'User doesnt exist!' }
     }
 
+    // deklarasi file image
+    let file = req.files?.photo
+    let filename = `${uuidv4()}-${file?.name}`
+
+    if (file) {
+      // if file upload exist
+      // get root folder
+      let root = path.dirname(require.main.filename)
+
+      // upload images path
+      uploadPath = `${root}/public/images/${filename}`
+
+      // Use the mv() method to place the file server
+      file.mv(uploadPath, async (err) => {
+        if (err) {
+          throw { statusCode: 400, message: 'Authentication is failed!' }
+        }
+      })
+    } else {
+      throw { statusCode: 400, message: 'File photo not found!' }
+    }
+
     // store data recipe to table recipes and return id
     const data = await recipes.createRecipes({
       userId,
-      photo,
+      photo: `/images/${filename}`,
       title,
       ingredients,
       video,
@@ -72,7 +96,7 @@ const createRecipes = async (req, res) => {
     })
 
     // check video
-    if (video.length > 0) {
+    if (video?.length > 0) {
       // get id data after insert
       const id = data[0].id
 
@@ -111,11 +135,31 @@ const updateRecipes = async (req, res) => {
     }
 
     // check if userId is allowed
-    if (getRecipes[0].user_id !== userId) {
+    if (getRecipes[0].user_id !== parseInt(userId)) {
       throw {
         statusCode: 403,
         message: 'User is not allowed to access this content!'
       }
+    }
+
+    // deklarasi file image
+    let file = req.files?.photo
+    let filename = `${uuidv4()}-${file?.name}`
+
+    if (file) {
+      // if file upload exist
+      // get root folder
+      let root = path.dirname(require.main.filename)
+
+      // upload images path
+      uploadPath = `${root}/public/images/${filename}`
+
+      // Use the mv() method to place the file server
+      file.mv(uploadPath, async (err) => {
+        if (err) {
+          throw { statusCode: 400, message: 'Authentication is failed!' }
+        }
+      })
     }
 
     // update data
@@ -124,7 +168,7 @@ const updateRecipes = async (req, res) => {
       title: title ?? getRecipes[0].title,
       description: description ?? getRecipes[0].description,
       ingredients: ingredients ?? getRecipes[0].ingredients,
-      photo: photo ?? getRecipes[0].photo
+      photo: file ? `/images/${filename}` : getRecipes[0].photo
     })
 
     res.status(200).json({

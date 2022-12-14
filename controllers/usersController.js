@@ -61,7 +61,7 @@ const create = async (req, res) => {
       // get root folder
       let root = path.dirname(require.main.filename)
 
-      let filename = `${uuidv4()}-${file.name}`
+      let filename = `${uuidv4()}-${file?.name}`
 
       // upload images path
       uploadPath = `${root}/public/images/${filename}`

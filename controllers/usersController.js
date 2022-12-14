@@ -123,7 +123,7 @@ const editUsers = async (req, res) => {
     // deklarasi file image
     let file = req.files?.photo
 
-    let filename = `${uuidv4()}-${file.name}`
+    let filename = `${uuidv4()}-${file?.name}`
 
     if (file) {
       // if file upload exist

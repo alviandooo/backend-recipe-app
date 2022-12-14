@@ -1,4 +1,6 @@
 const users = require('../models/users')
+const path = require('path')
+const { v4: uuidv4 } = require('uuid')
 
 // get users
 const getUsers = async (req, res) => {
@@ -51,14 +53,41 @@ const create = async (req, res) => {
       throw { statusCode: 409, message: 'Email is already exist!' }
     }
 
-    // query store data to database
-    await users.createUsers({ name, email, password, phone })
+    // deklarasi file image
+    let file = req.files?.photo
+
+    if (file) {
+      // if file upload exist
+      // get root folder
+      let root = path.dirname(require.main.filename)
+
+      let filename = `${uuidv4()}-${file.name}`
+
+      // upload images path
+      uploadPath = `${root}/public/images/${filename}`
+
+      // Use the mv() method to place the file server
+      file.mv(uploadPath, async (err) => {
+        if (err) {
+          throw { statusCode: 400, message: 'Authentication is failed!' }
+        } else {
+          await users.createUsers({
+            name,
+            email,
+            password,
+            phone,
+            photo: `/images/${filename}`
+          })
+        }
+      })
+    } else {
+      await users.createUsers({ name, email, password, phone })
+    }
 
     // return response
     res.status(201).json({
       status: true,
-      message: 'Data successfully created!',
-      data: []
+      message: 'Register is successfully!'
     })
   } catch (error) {
     res.status(error?.statusCode ?? 500).json({
@@ -91,6 +120,27 @@ const editUsers = async (req, res) => {
       }
     }
 
+    // deklarasi file image
+    let file = req.files?.photo
+
+    let filename = `${uuidv4()}-${file.name}`
+
+    if (file) {
+      // if file upload exist
+      // get root folder
+      let root = path.dirname(require.main.filename)
+
+      // upload images path
+      uploadPath = `${root}/public/images/${filename}`
+
+      // Use the mv() method to place the file server
+      file.mv(uploadPath, async (err) => {
+        if (err) {
+          throw { statusCode: 400, message: 'Authentication is failed!' }
+        }
+      })
+    }
+
     // update data users
     await users.editUsers({
       id,
@@ -98,7 +148,7 @@ const editUsers = async (req, res) => {
       email: email ?? getUser[0].email,
       phone: phone ?? getUser[0].phone,
       password: password ?? getUser[0].password,
-      photo: photo ?? getUser[0].photo
+      photo: file ? `/images/${filename}` : getUser[0].photo
     })
 
     // return response

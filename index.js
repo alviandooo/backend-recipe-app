@@ -8,11 +8,28 @@ const port = 3000
 const helmet = require('helmet')
 const xss = require('xss-clean')
 
+const fileUpload = require('express-fileupload')
+const path = require('path')
+
 const userRoutes = require('./routes/users')
 const authRoutes = require('./routes/auth')
 const recipeRoutes = require('./routes/recipes')
 const videosRoutes = require('./routes/recipeVideos')
 const commentsRoutes = require('./routes/comments')
+
+// default options
+// app.use(fileUpload())
+
+// use middleware for grant access upload
+app.use(
+  fileUpload({
+    useTempFiles: true,
+    tempFileDir: '/tmp/'
+  })
+)
+
+// grant access for public
+app.use('/static', express.static(path.join(__dirname, 'public')))
 
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }))

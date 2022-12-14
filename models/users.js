@@ -33,8 +33,13 @@ const getUsers = async (params) => {
 }
 
 const createUsers = async (params) => {
-  const { name, email, password, phone } = params
-  return await db`INSERT INTO users (name, email, phone, password, created_at, updated_at) VALUES(${name}, ${email}, ${phone}, ${password}, ${createdAt}, ${updatedAt})`
+  const { name, email, password, phone, photo } = params
+
+  if (photo) {
+    return await db`INSERT INTO users (name, email, phone, password, photo, created_at, updated_at) VALUES(${name}, ${email}, ${phone}, ${password}, ${photo}, ${createdAt}, ${updatedAt})`
+  } else {
+    return await db`INSERT INTO users (name, email, phone, password, created_at, updated_at) VALUES(${name}, ${email}, ${phone}, ${password}, ${createdAt}, ${updatedAt})`
+  }
 }
 
 const editUsers = async (params) => {

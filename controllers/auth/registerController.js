@@ -1,11 +1,13 @@
 const users = require('../../models/users')
 const path = require('path')
+const bcrypt = require('bcrypt')
 const { v4: uuidv4 } = require('uuid')
 
 // register users
 const register = async (req, res) => {
   try {
     const { name, email, phone, password } = req.body
+    const saltRounds = 10
 
     // validating email is exist
     const checkEmail = await users.getUsers({ email })
@@ -13,36 +15,43 @@ const register = async (req, res) => {
       throw { statusCode: 409, message: 'Email is already exist!' }
     }
 
-    // deklarasi file image
-    let file = req.files?.photo
+    // hash password
+    bcrypt.hash(password, saltRounds, async (err, hash) => {
+      if (err) {
+        throw { statusCode: 500, message: 'Authenticate is Failed!' }
+      }
 
-    if (file) {
-      // if file upload exist
-      // get root folder
-      let root = path.dirname(require.main.filename)
+      // deklarasi file image
+      let file = req.files?.photo
 
-      let filename = `${uuidv4()}-${file.name}`
+      if (file) {
+        // if file upload exist
+        // get root folder
+        let root = path.dirname(require.main.filename)
 
-      // upload images path
-      uploadPath = `${root}/public/images/${filename}`
+        let filename = `${uuidv4()}-${file.name}`
 
-      // Use the mv() method to place the file server
-      file.mv(uploadPath, async (err) => {
-        if (err) {
-          throw { statusCode: 400, message: 'Authentication is failed!' }
-        } else {
-          await users.createUsers({
-            name,
-            email,
-            password,
-            phone,
-            photo: `/images/${filename}`
-          })
-        }
-      })
-    } else {
-      await users.createUsers({ name, email, password, phone })
-    }
+        // upload images path
+        uploadPath = `${root}/public/images/profiles/${filename}`
+
+        // Use the mv() method to place the file server
+        file.mv(uploadPath, async (err) => {
+          if (err) {
+            throw { statusCode: 400, message: 'Authentication is failed!' }
+          } else {
+            await users.createUsers({
+              name,
+              email,
+              password: hash,
+              phone,
+              photo: `/images/profiles/${filename}`
+            })
+          }
+        })
+      } else {
+        await users.createUsers({ name, email, password: hash, phone })
+      }
+    })
 
     // return response
     res.status(201).json({

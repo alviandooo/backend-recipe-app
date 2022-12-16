@@ -1,19 +1,30 @@
 const router = require('express').Router()
 const recipesController = require('../controllers/recipesController')
 const recipesValidation = require('../middlewares/recipesValidation')
+const validateToken = require('../middlewares/tokenValidation')
 
-router.get('/:id?', recipesController.getRecipes)
+router.get('/:id?', validateToken.tokenValidate, recipesController.getRecipes)
 router.get(
   '/data/search',
+  validateToken.tokenValidate,
   recipesValidation.validateSearch,
   recipesController.searchRecipes
 )
 router.post(
   '/',
+  validateToken.tokenValidate,
   recipesValidation.validateCreate,
   recipesController.createRecipes
 )
-router.patch('/update/:id', recipesController.updateRecipes)
-router.delete('/delete/:id', recipesController.deleteRecipes)
+router.patch(
+  '/update/:id',
+  validateToken.tokenValidate,
+  recipesController.updateRecipes
+)
+router.delete(
+  '/delete/:id',
+  validateToken.tokenValidate,
+  recipesController.deleteRecipes
+)
 
 module.exports = router

@@ -64,7 +64,7 @@ const create = async (req, res) => {
       let filename = `${uuidv4()}-${file?.name}`
 
       // upload images path
-      uploadPath = `${root}/public/images/${filename}`
+      uploadPath = `${root}/public/images/profiles/${filename}`
 
       // Use the mv() method to place the file server
       file.mv(uploadPath, async (err) => {
@@ -76,7 +76,7 @@ const create = async (req, res) => {
             email,
             password,
             phone,
-            photo: `/images/${filename}`
+            photo: `/images/profiles/${filename}`
           })
         }
       })
@@ -131,7 +131,7 @@ const editUsers = async (req, res) => {
       let root = path.dirname(require.main.filename)
 
       // upload images path
-      uploadPath = `${root}/public/images/${filename}`
+      uploadPath = `${root}/public/images/profiles/${filename}`
 
       // Use the mv() method to place the file server
       file.mv(uploadPath, async (err) => {
@@ -148,7 +148,7 @@ const editUsers = async (req, res) => {
       email: email ?? getUser[0].email,
       phone: phone ?? getUser[0].phone,
       password: password ?? getUser[0].password,
-      photo: file ? `/images/${filename}` : getUser[0].photo
+      photo: file ? `/images/profiles/${filename}` : getUser[0].photo
     })
 
     // return response

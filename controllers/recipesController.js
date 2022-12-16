@@ -73,7 +73,7 @@ const createRecipes = async (req, res) => {
       let root = path.dirname(require.main.filename)
 
       // upload images path
-      uploadPath = `${root}/public/images/${filename}`
+      uploadPath = `${root}/public/images/recipes/${filename}`
 
       // Use the mv() method to place the file server
       file.mv(uploadPath, async (err) => {
@@ -88,7 +88,7 @@ const createRecipes = async (req, res) => {
     // store data recipe to table recipes and return id
     const data = await recipes.createRecipes({
       userId,
-      photo: `/images/${filename}`,
+      photo: `/images/recipes/${filename}`,
       title,
       ingredients,
       video,
@@ -152,7 +152,7 @@ const updateRecipes = async (req, res) => {
       let root = path.dirname(require.main.filename)
 
       // upload images path
-      uploadPath = `${root}/public/images/${filename}`
+      uploadPath = `${root}/public/images/recipes/${filename}`
 
       // Use the mv() method to place the file server
       file.mv(uploadPath, async (err) => {
@@ -168,7 +168,7 @@ const updateRecipes = async (req, res) => {
       title: title ?? getRecipes[0].title,
       description: description ?? getRecipes[0].description,
       ingredients: ingredients ?? getRecipes[0].ingredients,
-      photo: file ? `/images/${filename}` : getRecipes[0].photo
+      photo: file ? `/images/recipes/${filename}` : getRecipes[0].photo
     })
 
     res.status(200).json({

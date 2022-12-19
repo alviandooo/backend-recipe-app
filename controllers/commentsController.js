@@ -1,17 +1,23 @@
 const comments = require('../models/comments')
 const recipes = require('../models/recipes')
 const users = require('../models/users')
+const jwt = require('jsonwebtoken')
+require('dotenv').config()
+
+// get user_id from token jwt session
+const getUserId = (token) => {
+  const decoded = jwt.verify(token, process.env.JWT_KEY)
+  return decoded?.data?.id
+}
 
 // create comments
 const createComments = async (req, res) => {
   try {
-    const { userId, recipeId, comment } = req.body
+    const { recipeId, comment } = req.body
+    const { authorization } = req.headers
 
-    // validasi userId is exist
-    const checkUsers = await users.getUsers({ id: userId })
-    if (checkUsers.length < 1) {
-      throw { statusCode: 400, message: 'User doesnt exist!' }
-    }
+    // get user id from token session
+    const userId = getUserId(authorization.replace('Bearer ', ''))
 
     // check recipe_id is exist
     const checkRecipes = await recipes.getRecipes({ id: recipeId })
@@ -89,19 +95,23 @@ const getComments = async (req, res) => {
 const updateComments = async (req, res) => {
   try {
     const { id } = req.params
-    const { userId, comment } = req.body
+    const { comment } = req.body
+
+    const { authorization } = req.headers
+
+    // get user id from token session
+    const userId = getUserId(authorization.replace('Bearer ', ''))
 
     // get data comment
     const getComment = await comments.getComments({ id })
 
+    if (userId !== getComment[0]?.user_id) {
+      throw { statusCode: 401, message: 'User not allowed!' }
+    }
+
     // if data doesnt exist
     if (getComment.length < 1) {
       throw { statusCode: 400, message: 'Data doesnt exist!' }
-    }
-
-    // validasi users_id === comments.user_id
-    if (userId !== getComment[0].user_id) {
-      throw { statusCode: 403, message: 'User not allowed!' }
     }
 
     // update data comment
@@ -126,8 +136,17 @@ const deleteComments = async (req, res) => {
     const { id } = req.params
     const { recipeId } = req.query
 
+    const { authorization } = req.headers
+
+    // get user id from token session
+    const userId = getUserId(authorization.replace('Bearer ', ''))
+
     // check data is exist
     const getComment = await comments.getComments({ id, recipeId })
+
+    if (userId !== getComment[0]?.user_id) {
+      throw { statusCode: 401, message: 'User not allowed!' }
+    }
 
     if (getComment < 1) {
       throw { statusCode: 400, message: 'Data doesnt exist!' }

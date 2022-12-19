@@ -102,7 +102,7 @@ const create = async (req, res) => {
 const editUsers = async (req, res) => {
   try {
     const { id } = req.params
-    const { name, email, phone, password, photo } = req.body
+    const { name, email, phone, password } = req.body
 
     // get data users
     const getUser = await users.getUsers({ id })

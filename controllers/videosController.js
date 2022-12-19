@@ -1,18 +1,35 @@
 const router = require('express').Router()
 const recipeVideos = require('../models/recipeVideos')
 const recipes = require('../models/recipes')
+const jwt = require('jsonwebtoken')
+require('dotenv').config()
+
+// get user_id from token jwt session
+const getUserId = (token) => {
+  const decoded = jwt.verify(token, process.env.JWT_KEY)
+  return decoded?.data?.id
+}
 
 // create videos
 const createRecipeVideos = async (req, res) => {
   try {
     const { recipeId, video } = req.body
+    const { authorization } = req.headers
+
+    // get user id from token session
+    const userId = getUserId(authorization.replace('Bearer ', ''))
 
     // check recipe_id is exist
     const checkRecipes = await recipes.getRecipes({ id: recipeId })
 
+    if (userId !== checkRecipes[0]?.user_id) {
+      throw { statusCode: 401, message: 'User not allowed!' }
+    }
+
     if (checkRecipes.length < 1) {
       throw { statusCode: 400, message: 'Recipe ID doesnt exist!' }
     }
+
     // store data recipe to table recipes and return id
     await recipeVideos.createVideos({
       videos: { recipe_id: recipeId, video }
@@ -85,10 +102,19 @@ const getRecipeVideos = async (req, res) => {
 const updateRecipeVideos = async (req, res) => {
   try {
     const { id } = req.params
-    const { recipeId, video } = req.body
+    const { video } = req.body
+    const { authorization } = req.headers
+
+    // get user id from token session
+    const userId = getUserId(authorization.replace('Bearer ', ''))
 
     // check data recipe by id is exist
     const getVideos = await recipeVideos.getVideos({ id })
+
+    if (userId !== getVideos[0]?.user_id) {
+      throw { statusCode: 401, message: 'User not allowed!' }
+    }
+
     if (getVideos.length < 1) {
       throw { statusCode: 400, message: 'Data not found, please try again!' }
     }
@@ -116,9 +142,17 @@ const deleteRecipeVideos = async (req, res) => {
   try {
     const { id } = req.params
     const { recipeId } = req.query
+    const { authorization } = req.headers
+
+    // get user id from token session
+    const userId = getUserId(authorization.replace('Bearer ', ''))
 
     // check data is exist
     const getVideos = await recipeVideos.getVideos({ id, recipeId })
+
+    if (userId !== getVideos[0]?.user_id) {
+      throw { statusCode: 401, message: 'User not allowed!' }
+    }
 
     if (getVideos < 1) {
       throw { statusCode: 400, message: 'Data doesnt exist!' }

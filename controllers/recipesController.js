@@ -134,14 +134,6 @@ const updateRecipes = async (req, res) => {
       throw { statusCode: 400, message: 'Data not found, please try again!' }
     }
 
-    // check if userId is allowed
-    if (getRecipes[0].user_id !== parseInt(userId)) {
-      throw {
-        statusCode: 403,
-        message: 'User is not allowed to access this content!'
-      }
-    }
-
     // deklarasi file image
     let file = req.files?.photo
     let filename = `${uuidv4()}-${file?.name}`

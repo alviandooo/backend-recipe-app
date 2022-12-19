@@ -19,11 +19,13 @@ router.post(
 router.patch(
   '/update/:id',
   validateToken.tokenValidate,
+  recipesValidation.checkUser,
   recipesController.updateRecipes
 )
 router.delete(
   '/delete/:id',
   validateToken.tokenValidate,
+  recipesValidation.checkUser,
   recipesController.deleteRecipes
 )
 

@@ -10,7 +10,6 @@ const validateLogin = async (req, res, next) => {
     if (matched) {
       next()
     } else {
-      console.log(rules.errors)
       res.status(400).json({
         status: false,
         message:

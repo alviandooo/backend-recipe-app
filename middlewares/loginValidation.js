@@ -23,6 +23,7 @@ const checkToken = async (req, res, next) => {
             }
           }
 
+          // response account already loggin!
           res.status(200).json({
             status: true,
             message: 'Your account has been logged!',

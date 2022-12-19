@@ -1,6 +1,7 @@
 const users = require('../models/users')
 const path = require('path')
 const { v4: uuidv4 } = require('uuid')
+const { connectRedis } = require('../middlewares/redis')
 
 // get users
 const getUsers = async (req, res) => {
@@ -8,6 +9,7 @@ const getUsers = async (req, res) => {
     let statusCode = 200
     let message
     let dataUsers = []
+    let url
 
     const { id } = req.params // get parameter id
     const { limit, page, sort, typeSort } = req.query // ?limit=&page=&sort=&typeSort=
@@ -22,6 +24,14 @@ const getUsers = async (req, res) => {
       statusCode = 400 // no content
       message = 'Data not found!'
     }
+
+    // store data to redis for 10 seconds
+    connectRedis.set('url', req.originalUrl, 'ex', 10)
+    connectRedis.set('data', JSON.stringify(dataUsers), 'ex', 10)
+    if (sort) connectRedis.set('sort', sort, 'ex', 10)
+    if (typeSort) connectRedis.set('typeSort', typeSort, 'ex', 10)
+    if (page) connectRedis.set('page', page ?? 1, 'ex', 10)
+    if (limit) connectRedis.set('limit', limit, 'ex', 10)
 
     res.status(statusCode ?? 200).json({
       status: true,

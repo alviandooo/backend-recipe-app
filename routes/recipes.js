@@ -1,9 +1,15 @@
 const router = require('express').Router()
 const recipesController = require('../controllers/recipesController')
 const recipesValidation = require('../middlewares/recipesValidation')
+const { useRedis } = require('../middlewares/redis')
 const validateToken = require('../middlewares/tokenValidation')
 
-router.get('/:id?', validateToken.tokenValidate, recipesController.getRecipes)
+router.get(
+  '/:id?',
+  validateToken.tokenValidate,
+  useRedis,
+  recipesController.getRecipes
+)
 router.get(
   '/data/search',
   validateToken.tokenValidate,

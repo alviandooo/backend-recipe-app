@@ -31,9 +31,9 @@ const checkToken = async (req, res, next) => {
           })
         }
       )
+    } else {
+      next()
     }
-
-    next()
   } catch (error) {
     res.status(error?.statusCode ?? 500).json({
       status: false,

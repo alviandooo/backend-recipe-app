@@ -5,6 +5,8 @@ const path = require('path')
 const { v4: uuidv4 } = require('uuid')
 const { connectRedis } = require('../middlewares/redis')
 
+const extFile = ['jpeg', 'JPEG', 'jpg', 'JPG', 'PNG', 'png', 'webp', 'WEBP']
+
 const getRecipes = async (req, res) => {
   try {
     const statusCode = 200
@@ -78,6 +80,17 @@ const createRecipes = async (req, res) => {
 
     if (file) {
       // if file upload exist
+
+      //if file extension is allowed
+      const mimeType = file.mimetype.split('/')[1]
+      const allowedFile = extFile.includes(mimeType)
+      if (!allowedFile) {
+        throw {
+          statusCode: 400,
+          message: 'File is not support! please select image file'
+        }
+      }
+
       // get root folder
       let root = path.dirname(require.main.filename)
 
@@ -149,6 +162,17 @@ const updateRecipes = async (req, res) => {
 
     if (file) {
       // if file upload exist
+
+      //if file extension is allowed
+      const mimeType = file.mimetype.split('/')[1]
+      const allowedFile = extFile.includes(mimeType)
+      if (!allowedFile) {
+        throw {
+          statusCode: 400,
+          message: 'File is not support! please select image file'
+        }
+      }
+
       // get root folder
       let root = path.dirname(require.main.filename)
 

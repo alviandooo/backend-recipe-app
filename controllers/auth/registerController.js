@@ -1,8 +1,9 @@
 const users = require('../../models/users')
-const path = require('path')
-const { v4: uuidv4 } = require('uuid')
 const bcrypt = require('bcrypt')
 const { checkSizeUpload, moveFileUpload } = require('../../utils/uploadFile')
+
+// extension file upload allowed
+const extFile = ['jpeg', 'JPEG', 'jpg', 'JPG', 'PNG', 'png', 'webp', 'WEBP']
 
 // register users
 const register = async (req, res) => {
@@ -18,7 +19,7 @@ const register = async (req, res) => {
 
     // hash password
     const hash = await bcrypt.hash(password, saltRounds)
-    if (hash) {
+    if (!hash) {
       throw { statusCode: 400, message: 'Authentication is failed!' }
     }
 
@@ -33,6 +34,18 @@ const register = async (req, res) => {
         throw {
           statusCode: 400,
           message: 'File upload is too large! only support < 1 MB'
+        }
+      }
+
+      // check type extension file upload
+      const mimeType = file.mimetype.split('/')[1]
+      const allowedFile = extFile.includes(mimeType)
+      if (!allowedFile) {
+        throw {
+          statusCode: 400,
+          message: `File is not support! please select image ${extFile.join(
+            ', '
+          )}`
         }
       }
 

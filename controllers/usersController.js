@@ -2,8 +2,10 @@ const users = require('../models/users')
 const path = require('path')
 const { v4: uuidv4 } = require('uuid')
 const { connectRedis } = require('../middlewares/redis')
+const bcrypt = require('bcrypt')
 
 const extFile = ['jpeg', 'JPEG', 'jpg', 'JPG', 'PNG', 'png', 'webp', 'WEBP']
+const saltRounds = 10
 
 // get users
 const getUsers = async (req, res) => {
@@ -65,47 +67,54 @@ const create = async (req, res) => {
       throw { statusCode: 409, message: 'Email is already exist!' }
     }
 
-    // deklarasi file image
-    let file = req.files?.photo
-
-    if (file) {
-      // if file upload exist
-
-      //if file extension is allowed
-      const mimeType = file.mimetype.split('/')[1]
-      const allowedFile = extFile.includes(mimeType)
-      if (!allowedFile) {
-        throw {
-          statusCode: 400,
-          message: 'File is not support! please select image file'
-        }
+    // hash password
+    bcrypt.hash(password, saltRounds, async (err, hash) => {
+      if (err) {
+        throw { statusCode: 500, message: 'Authenticate is Failed!' }
       }
 
-      // get root folder
-      let root = path.dirname(require.main.filename)
+      // deklarasi file image
+      let file = req.files?.photo
 
-      let filename = `${uuidv4()}-${file?.name}`
+      if (file) {
+        // if file upload exist
 
-      // upload images path
-      uploadPath = `${root}/public/images/profiles/${filename}`
-
-      // Use the mv() method to place the file server
-      file.mv(uploadPath, async (err) => {
-        if (err) {
-          throw { statusCode: 400, message: 'Authentication is failed!' }
-        } else {
-          await users.createUsers({
-            name,
-            email,
-            password,
-            phone,
-            photo: `/images/profiles/${filename}`
-          })
+        //if file extension is allowed
+        const mimeType = file.mimetype.split('/')[1]
+        const allowedFile = extFile.includes(mimeType)
+        if (!allowedFile) {
+          throw {
+            statusCode: 400,
+            message: 'File is not support! please select image file'
+          }
         }
-      })
-    } else {
-      await users.createUsers({ name, email, password, phone })
-    }
+
+        // get root folder
+        let root = path.dirname(require.main.filename)
+
+        let filename = `${uuidv4()}-${file?.name}`
+
+        // upload images path
+        uploadPath = `${root}/public/images/profiles/${filename}`
+
+        // Use the mv() method to place the file server
+        file.mv(uploadPath, async (err) => {
+          if (err) {
+            throw { statusCode: 400, message: 'Authentication is failed!' }
+          } else {
+            await users.createUsers({
+              name,
+              email,
+              password: hash,
+              phone,
+              photo: `/images/profiles/${filename}`
+            })
+          }
+        })
+      } else {
+        await users.createUsers({ name, email, password: hash, phone })
+      }
+    })
 
     // return response
     res.status(201).json({
@@ -143,46 +152,53 @@ const editUsers = async (req, res) => {
       }
     }
 
-    // deklarasi file image
-    let file = req.files?.photo
-
-    let filename = `${uuidv4()}-${file?.name}`
-
-    if (file) {
-      // if file upload exist
-
-      //if file extension is allowed
-      const mimeType = file.mimetype.split('/')[1]
-      const allowedFile = extFile.includes(mimeType)
-      if (!allowedFile) {
-        throw {
-          statusCode: 400,
-          message: 'File is not support! please select image file'
-        }
+    // hash password
+    bcrypt.hash(password, saltRounds, async (err, hash) => {
+      if (err) {
+        throw { statusCode: 500, message: 'Authenticate is Failed!' }
       }
 
-      // get root folder
-      let root = path.dirname(require.main.filename)
+      // deklarasi file image
+      let file = req.files?.photo
 
-      // upload images path
-      uploadPath = `${root}/public/images/profiles/${filename}`
+      let filename = `${uuidv4()}-${file?.name}`
 
-      // Use the mv() method to place the file server
-      file.mv(uploadPath, async (err) => {
-        if (err) {
-          throw { statusCode: 400, message: 'Authentication is failed!' }
+      if (file) {
+        // if file upload exist
+
+        //if file extension is allowed
+        const mimeType = file.mimetype.split('/')[1]
+        const allowedFile = extFile.includes(mimeType)
+        if (!allowedFile) {
+          throw {
+            statusCode: 400,
+            message: 'File is not support! please select image file'
+          }
         }
-      })
-    }
 
-    // update data users
-    await users.editUsers({
-      id,
-      name: name ?? getUser[0].name,
-      email: email ?? getUser[0].email,
-      phone: phone ?? getUser[0].phone,
-      password: password ?? getUser[0].password,
-      photo: file ? `/images/profiles/${filename}` : getUser[0].photo
+        // get root folder
+        let root = path.dirname(require.main.filename)
+
+        // upload images path
+        uploadPath = `${root}/public/images/profiles/${filename}`
+
+        // Use the mv() method to place the file server
+        file.mv(uploadPath, async (err) => {
+          if (err) {
+            throw { statusCode: 400, message: 'Authentication is failed!' }
+          }
+        })
+      }
+
+      // update data users
+      await users.editUsers({
+        id,
+        name: name ?? getUser[0].name,
+        email: email ?? getUser[0].email,
+        phone: phone ?? getUser[0].phone,
+        password: hash ?? getUser[0].password,
+        photo: file ? `/images/profiles/${filename}` : getUser[0].photo
+      })
     })
 
     // return response

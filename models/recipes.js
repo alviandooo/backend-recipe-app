@@ -50,7 +50,7 @@ const getRecipes = async (params) => {
 
 // create recipes
 const createRecipes = async (params) => {
-  const { userId, photo, title, ingredients, video, description } = params
+  const { userId, photo, title, ingredients, description } = params
   return await db`INSERT INTO recipes (user_id, title, description, ingredients, photo, created_at, updated_at) VALUES(${userId}, ${title}, ${description}, ${ingredients}, ${photo}, ${createdAt}, ${updatedAt}) RETURNING id`
 }
 

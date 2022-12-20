@@ -4,8 +4,10 @@ const recipeVideos = require('../models/recipeVideos')
 const path = require('path')
 const { v4: uuidv4 } = require('uuid')
 const { connectRedis } = require('../middlewares/redis')
-
-const extFile = ['jpeg', 'JPEG', 'jpg', 'JPG', 'PNG', 'png', 'webp', 'WEBP']
+const jwt = require('jsonwebtoken')
+const { decodeToken } = require('../utils/JWTToken')
+const { checkSizeUpload, checkExtensionFile } = require('../utils/uploadFile')
+const { uploadCloudinary, deleteCloudinary } = require('../utils/cloudinary')
 
 const getRecipes = async (req, res) => {
   try {
@@ -66,69 +68,77 @@ const getRecipes = async (req, res) => {
 
 const createRecipes = async (req, res) => {
   try {
-    const { userId, photo, title, ingredients, video, description } = req.body
+    const { title, ingredients, video, description } = req.body
+    const { authorization } = req.headers
 
-    // validasi userId is exist
-    const checkUsers = await users.getUsers({ id: userId })
+    // decode jwt token
+    const decoded = decodeToken(authorization)
+    // get user id from jwt token
+    const userIdToken = decoded?.data?.id
+
+    // validate userId is exist
+    const checkUsers = await users.getUsers({ id: userIdToken })
     if (checkUsers.length < 1) {
       throw { statusCode: 400, message: 'User doesnt exist!' }
     }
 
-    // deklarasi file image
+    // declare file image
     let file = req.files?.photo
-    let filename = `${uuidv4()}-${file?.name}`
 
     if (file) {
-      // if file upload exist
-
-      //if file extension is allowed
-      const mimeType = file.mimetype.split('/')[1]
-      const allowedFile = extFile.includes(mimeType)
-      if (!allowedFile) {
+      // check size file upload
+      const checkSize = checkSizeUpload(file)
+      if (!checkSize) {
         throw {
           statusCode: 400,
-          message: 'File is not support! please select image file'
+          message: 'File upload is too large! only support < 1 MB'
         }
       }
 
-      // get root folder
-      let root = path.dirname(require.main.filename)
-
-      // upload images path
-      uploadPath = `${root}/public/images/recipes/${filename}`
-
-      // Use the mv() method to place the file server
-      file.mv(uploadPath, async (err) => {
-        if (err) {
-          throw { statusCode: 400, message: 'Authentication is failed!' }
+      // check type extension file upload
+      const allowedFile = checkExtensionFile(file)
+      if (!allowedFile) {
+        throw {
+          statusCode: 400,
+          message: `File is not support! format file must be image`
         }
-      })
+      }
+
+      // upload file
+      const uploadFile = await uploadCloudinary(file)
+      if (!uploadFile.success) {
+        throw { statusCode: 400, message: 'Upload file error!' }
+      } else {
+        // store data recipe to table recipes and return id
+        const data = await recipes.createRecipes({
+          userId: userIdToken,
+          photo: uploadFile.urlUpload,
+          title,
+          ingredients,
+          description
+        })
+
+        let videos
+        // get id data after insert
+        const id = data[0].id
+        // check video
+        if (Array.isArray(video)) {
+          // convert array video to array object for query multiple insert
+          videos = video.map((item) => {
+            return { recipe_id: id, video: item }
+          })
+        } else {
+          videos = { recipe_id: id, video: video }
+        }
+
+        // store videos to table recipe_videos
+        await recipeVideos.createVideos({ videos })
+      }
     } else {
-      throw { statusCode: 400, message: 'File photo not found!' }
-    }
-
-    // store data recipe to table recipes and return id
-    const data = await recipes.createRecipes({
-      userId,
-      photo: `/images/recipes/${filename}`,
-      title,
-      ingredients,
-      video,
-      description
-    })
-
-    // check video
-    if (video?.length > 0) {
-      // get id data after insert
-      const id = data[0].id
-
-      // convert array video to array object for query multiple insert
-      const videos = video.map((item, key) => {
-        return { recipe_id: id, video: item }
-      })
-
-      // store videos to table recipe_videos
-      await recipeVideos.createVideos({ videos })
+      throw {
+        statusCode: 400,
+        message: `Photo must be required!`
+      }
     }
 
     res.status(200).json({
@@ -148,7 +158,20 @@ const createRecipes = async (req, res) => {
 const updateRecipes = async (req, res) => {
   try {
     const { id } = req.params
-    const { userId, title, description, ingredients, photo } = req.body
+    const { title, description, ingredients } = req.body
+    const { authorization } = req.headers
+
+    // decode jwt token
+    const decoded = decodeToken(authorization)
+
+    // get user id from jwt token
+    const userIdToken = decoded?.data?.id
+
+    // validate userId is exist
+    const checkUsers = await users.getUsers({ id: userIdToken })
+    if (checkUsers.length < 1) {
+      throw { statusCode: 400, message: 'User doesnt exist!' }
+    }
 
     // check data recipe by id is exist
     const getRecipes = await recipes.getRecipes({ id })
@@ -156,35 +179,42 @@ const updateRecipes = async (req, res) => {
       throw { statusCode: 400, message: 'Data not found, please try again!' }
     }
 
-    // deklarasi file image
+    // declare file image
     let file = req.files?.photo
-    let filename = `${uuidv4()}-${file?.name}`
+    let filename = null
 
     if (file) {
-      // if file upload exist
-
-      //if file extension is allowed
-      const mimeType = file.mimetype.split('/')[1]
-      const allowedFile = extFile.includes(mimeType)
-      if (!allowedFile) {
+      // check size file upload
+      const checkSize = checkSizeUpload(file)
+      if (!checkSize) {
         throw {
           statusCode: 400,
-          message: 'File is not support! please select image file'
+          message: 'File upload is too large! only support < 1 MB'
         }
       }
 
-      // get root folder
-      let root = path.dirname(require.main.filename)
-
-      // upload images path
-      uploadPath = `${root}/public/images/recipes/${filename}`
-
-      // Use the mv() method to place the file server
-      file.mv(uploadPath, async (err) => {
-        if (err) {
-          throw { statusCode: 400, message: 'Authentication is failed!' }
+      // check type extension file upload
+      const allowedFile = checkExtensionFile(file)
+      if (!allowedFile) {
+        throw {
+          statusCode: 400,
+          message: `File is not support! format file must be image`
         }
-      })
+      }
+
+      // upload file
+      const uploadFile = await uploadCloudinary(file)
+      if (!uploadFile.success) {
+        throw { statusCode: 400, message: 'Upload file error!' }
+      } else {
+        filename = uploadFile.urlUpload
+      }
+
+      // delete old file
+      const deleteFile = await deleteCloudinary(getRecipes[0].photo)
+      if (!deleteFile.success) {
+        throw { statusCode: 400, message: 'Delete old file error!' }
+      }
     }
 
     // update data
@@ -193,8 +223,38 @@ const updateRecipes = async (req, res) => {
       title: title ?? getRecipes[0].title,
       description: description ?? getRecipes[0].description,
       ingredients: ingredients ?? getRecipes[0].ingredients,
-      photo: file ? `/images/recipes/${filename}` : getRecipes[0].photo
+      photo: filename ?? getRecipes[0].photo
     })
+
+    // // deklarasi file image
+    // let file = req.files?.photo
+    // let filename = `${uuidv4()}-${file?.name}`
+
+    // if (file) {
+    //
+
+    //   // get root folder
+    //   let root = path.dirname(require.main.filename)
+
+    //   // upload images path
+    //   uploadPath = `${root}/public/images/recipes/${filename}`
+
+    //   // Use the mv() method to place the file server
+    //   file.mv(uploadPath, async (err) => {
+    //     if (err) {
+    //       throw { statusCode: 400, message: 'Authentication is failed!' }
+    //     }
+    //   })
+    // }
+
+    // // update data
+    // await recipes.editRecipes({
+    //   id,
+    //   title: title ?? getRecipes[0].title,
+    //   description: description ?? getRecipes[0].description,
+    //   ingredients: ingredients ?? getRecipes[0].ingredients,
+    //   photo: file ? `/images/recipes/${filename}` : getRecipes[0].photo
+    // })
 
     res.status(200).json({
       status: true,
@@ -219,6 +279,12 @@ const deleteRecipes = async (req, res) => {
     if (getRecipes < 1) {
       throw { statusCode: 400, message: 'Data doesnt exist!' }
     } else {
+      // delete old photo profil
+      const deleteFile = await deleteCloudinary(getRecipes[0].photo)
+      if (!deleteFile.success) {
+        throw { statusCode: 400, message: 'Delete old photo error!' }
+      }
+
       // delete data from database
       await recipes.deleteRecipes({ id })
     }

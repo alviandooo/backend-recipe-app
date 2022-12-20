@@ -5,11 +5,11 @@ const db = require('../db')
 
 const validateCreate = async (req, res, next) => {
   const rules = new Validator(req.body, {
-    userId: 'required',
+    // userId: 'required',
     title: 'required|minLength:3|maxLength:30',
     // photo: 'required',
     ingredients: 'required|minLength:5',
-    // video: 'required|array',
+    video: 'required',
     description: 'required|minLength:5'
   })
 
@@ -20,8 +20,8 @@ const validateCreate = async (req, res, next) => {
       res.status(400).json({
         status: false,
         message:
-          rules.errors?.userId?.message ??
-          rules.errors?.photo?.message ??
+          // rules.errors?.userId?.message ??
+          // rules.errors?.photo?.message ??
           rules.errors?.ingredients?.message ??
           rules.errors?.description?.message ??
           rules.errors?.title?.message ??

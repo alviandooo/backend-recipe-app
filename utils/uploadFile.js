@@ -17,6 +17,14 @@ const checkSizeUpload = (file, limit = limitSize) => {
   return true
 }
 
+const checkExtensionFile = (file) => {
+  // extension file upload allowed
+  const extFile = ['jpeg', 'JPEG', 'jpg', 'JPG', 'PNG', 'png', 'webp', 'WEBP']
+
+  const mimeType = file.mimetype.split('/')[1]
+  return extFile.includes(mimeType)
+}
+
 const moveFileUpload = async (file) => {
   // get root folder
   let root = path.dirname(require.main.filename)
@@ -35,4 +43,4 @@ const moveFileUpload = async (file) => {
   return { success: true, filename }
 }
 
-module.exports = { checkSizeUpload, moveFileUpload }
+module.exports = { checkSizeUpload, moveFileUpload, checkExtensionFile }

@@ -1,9 +1,9 @@
 const users = require('../models/users')
 const { connectRedis } = require('../middlewares/redis')
 const bcrypt = require('bcrypt')
-const { checkSizeUpload, moveFileUpload } = require('../utils/uploadFile')
+const { checkSizeUpload, checkExtensionFile } = require('../utils/uploadFile')
+const { uploadCloudinary, deleteCloudinary } = require('../utils/cloudinary')
 
-const extFile = ['jpeg', 'JPEG', 'jpg', 'JPG', 'PNG', 'png', 'webp', 'WEBP']
 const saltRounds = 10
 
 // get users
@@ -77,15 +77,16 @@ const editUsers = async (req, res) => {
       }
     }
 
-    // hash password
-    const hash = await bcrypt.hash(password, saltRounds)
-    if (!hash) {
-      throw { statusCode: 400, message: 'Authentication is failed!' }
+    if (password) {
+      // hash password
+      const hash = await bcrypt.hash(password, saltRounds)
+      if (!hash) {
+        throw { statusCode: 400, message: 'Authentication is failed!' }
+      }
     }
 
     // deklarasi file image
     let file = req.files?.photo
-
     let filename = null
 
     // if file upload exist
@@ -100,23 +101,26 @@ const editUsers = async (req, res) => {
       }
 
       // check type extension file upload
-      const mimeType = file.mimetype.split('/')[1]
-      const allowedFile = extFile.includes(mimeType)
+      const allowedFile = checkExtensionFile(file)
       if (!allowedFile) {
         throw {
           statusCode: 400,
-          message: `File is not support! please select image ${extFile.join(
-            ', '
-          )}`
+          message: `File is not support! format file must be image`
         }
       }
 
-      // move file
-      const moveFile = await moveFileUpload(file)
-      if (!moveFile.success) {
+      // upload file
+      const uploadFile = await uploadCloudinary(file)
+      if (!uploadFile.success) {
         throw { statusCode: 400, message: 'Upload file error!' }
       } else {
-        filename = moveFile.filename
+        filename = uploadFile.urlUpload
+      }
+
+      // delete old file
+      const deleteFile = await deleteCloudinary(getUser[0].photo)
+      if (!deleteFile.success) {
+        throw { statusCode: 400, message: 'Delete old file error!' }
       }
     }
 
@@ -126,8 +130,8 @@ const editUsers = async (req, res) => {
       name: name ?? getUser[0].name,
       email: email ?? getUser[0].email,
       phone: phone ?? getUser[0].phone,
-      password: hash ?? getUser[0].password,
-      photo: filename ? `/images/profiles/${filename}` : getUser[0].photo
+      password: password ? hash : getUser[0].password,
+      photo: filename ?? getUser[0].photo
     })
 
     // return response
@@ -154,6 +158,12 @@ const deleteUsers = async (req, res) => {
     if (checkUser < 1) {
       throw { statusCode: 400, message: 'Data doesnt exist!' }
     } else {
+      // delete old photo profil
+      const deleteFile = await deleteCloudinary(checkUser[0].photo)
+      if (!deleteFile.success) {
+        throw { statusCode: 400, message: 'Delete old photo error!' }
+      }
+
       // delete data from database
       await users.deleteUsers({ id })
     }

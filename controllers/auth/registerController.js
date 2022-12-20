@@ -1,9 +1,10 @@
 const users = require('../../models/users')
 const bcrypt = require('bcrypt')
-const { checkSizeUpload, moveFileUpload } = require('../../utils/uploadFile')
-
-// extension file upload allowed
-const extFile = ['jpeg', 'JPEG', 'jpg', 'JPG', 'PNG', 'png', 'webp', 'WEBP']
+const {
+  checkSizeUpload,
+  checkExtensionFile
+} = require('../../utils/uploadFile')
+const { uploadCloudinary } = require('../../utils/cloudinary')
 
 // register users
 const register = async (req, res) => {
@@ -38,20 +39,17 @@ const register = async (req, res) => {
       }
 
       // check type extension file upload
-      const mimeType = file.mimetype.split('/')[1]
-      const allowedFile = extFile.includes(mimeType)
+      const allowedFile = checkExtensionFile(file)
       if (!allowedFile) {
         throw {
           statusCode: 400,
-          message: `File is not support! please select image ${extFile.join(
-            ', '
-          )}`
+          message: `File is not support! format file must be image`
         }
       }
 
-      // move file
-      const moveFile = await moveFileUpload(file)
-      if (!moveFile.success) {
+      // upload file
+      const uploadFile = await uploadCloudinary(file)
+      if (!uploadFile.success) {
         throw { statusCode: 400, message: 'Upload file error!' }
       } else {
         // store database if upload image success
@@ -60,7 +58,7 @@ const register = async (req, res) => {
           email,
           password: hash,
           phone,
-          photo: `/images/profiles/${moveFile.filename}`
+          photo: uploadFile.urlUpload
         })
       }
     } else {

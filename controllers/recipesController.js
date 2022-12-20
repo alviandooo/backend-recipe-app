@@ -226,36 +226,6 @@ const updateRecipes = async (req, res) => {
       photo: filename ?? getRecipes[0].photo
     })
 
-    // // deklarasi file image
-    // let file = req.files?.photo
-    // let filename = `${uuidv4()}-${file?.name}`
-
-    // if (file) {
-    //
-
-    //   // get root folder
-    //   let root = path.dirname(require.main.filename)
-
-    //   // upload images path
-    //   uploadPath = `${root}/public/images/recipes/${filename}`
-
-    //   // Use the mv() method to place the file server
-    //   file.mv(uploadPath, async (err) => {
-    //     if (err) {
-    //       throw { statusCode: 400, message: 'Authentication is failed!' }
-    //     }
-    //   })
-    // }
-
-    // // update data
-    // await recipes.editRecipes({
-    //   id,
-    //   title: title ?? getRecipes[0].title,
-    //   description: description ?? getRecipes[0].description,
-    //   ingredients: ingredients ?? getRecipes[0].ingredients,
-    //   photo: file ? `/images/recipes/${filename}` : getRecipes[0].photo
-    // })
-
     res.status(200).json({
       status: true,
       message: 'Data is successfully updated!'

@@ -14,11 +14,13 @@ router.post(
 router.patch(
   '/update/:id',
   validateToken.tokenValidate,
+  commentsValidation.checkUser,
   commentsController.updateComments
 )
 router.delete(
   '/delete/:id',
   validateToken.tokenValidate,
+  commentsValidation.checkUser,
   commentsController.deleteComments
 )
 

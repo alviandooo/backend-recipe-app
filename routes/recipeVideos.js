@@ -17,11 +17,13 @@ router.post(
 router.patch(
   '/update/:id',
   validateToken.tokenValidate,
+  recipesVideosValidation.checkUser,
   recipesVideosController.updateRecipeVideos
 )
 router.delete(
   '/delete/:id?',
   validateToken.tokenValidate,
+  recipesVideosValidation.checkUser,
   recipesVideosController.deleteRecipeVideos
 )
 

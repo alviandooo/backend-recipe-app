@@ -5,7 +5,7 @@ const path = require('path')
 const { v4: uuidv4 } = require('uuid')
 const { connectRedis } = require('../middlewares/redis')
 const jwt = require('jsonwebtoken')
-const { decodeToken } = require('../utils/JWTToken')
+const { decodeToken } = require('../utils/jwtToken')
 const { checkSizeUpload, checkExtensionFile } = require('../utils/uploadFile')
 const { uploadCloudinary, deleteCloudinary } = require('../utils/cloudinary')
 

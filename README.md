@@ -17,7 +17,7 @@ You can demo app using this url : https://light-snaps-ray.cyclic.app/
 - Cloudinary (Image upload server)
 - JWT (JSON Web Token)
 
-## Installation :
+## Installation
 
 Clone the project in your local :
 

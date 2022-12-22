@@ -46,6 +46,14 @@ app.use(helmet())
 // use cors
 app.use(cors())
 
+app.use('/', (req, res) => {
+  res.json({
+    status: true,
+    message: 'Server running',
+    version: '1.0.0'
+  })
+})
+
 // ================== ENDPOINT AUTHENTICATION ==================
 // auth route
 app.use('/auth', authRoutes)

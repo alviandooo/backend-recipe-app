@@ -26,23 +26,7 @@ Clone the project in your local :
 ## Setup
 
 - Copy .env.example and paste with filename .env
-- Fill the env with your config
-
-  DB_HOST=
-  DB_NAME=
-  DB_USER=
-  DB_PASS=
-  DB_PORT=
-
-  JWT_KEY=
-
-  REDIS_HOST=
-  REDIS_PORT=
-  REDIS_PASSWORD=
-
-  CLOUD_NAME=
-  CLOUD_KEY=
-  CLOUD_SECRET=
+- Fill Variables in file .env with your config
 
 ## Install Packages
 

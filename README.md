@@ -4,6 +4,10 @@
 
 backend-recipe-app is endpoints of Recipe-app that can help users to find or sharing about food recipes. The app is built using Express JS & PostgreSQL.
 
+## Demo
+
+You can demo app using this url : https://light-snaps-ray.cyclic.app/
+
 ## Stack
 
 - NodeJs
@@ -17,7 +21,7 @@ backend-recipe-app is endpoints of Recipe-app that can help users to find or sha
 
 Clone the project in your local :
 
-    ``` git clone https://github.com/alviandooo/backend-recipe-app.git ```
+    git clone https://github.com/alviandooo/backend-recipe-app.git
 
 ## Setup
 
@@ -44,7 +48,7 @@ CLOUD_SECRET=
 
 Finally after setup configuration .env, you have to install all of packages that needed using this command
 
-    ``` npm install ```
+    npm install
 
 ## Done
 

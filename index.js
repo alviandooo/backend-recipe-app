@@ -46,14 +46,6 @@ app.use(helmet())
 // use cors
 app.use(cors())
 
-app.use('/', (req, res) => {
-  res.json({
-    status: true,
-    message: 'Server running',
-    version: '1.0.0'
-  })
-})
-
 // ================== ENDPOINT AUTHENTICATION ==================
 // auth route
 app.use('/auth', authRoutes)
@@ -72,6 +64,14 @@ app.use('/recipe-videos', videosRoutes)
 
 // ================== ENDPOINT COMMENTS ==================
 app.use('/comments', commentsRoutes)
+
+app.use('/', (req, res) => {
+  res.json({
+    status: true,
+    message: 'Server running',
+    version: '1.0.0'
+  })
+})
 
 // running express port 3000
 app.listen(port, () => {

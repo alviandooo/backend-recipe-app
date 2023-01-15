@@ -55,6 +55,7 @@ const getRecipes = async (req, res) => {
       page: parseInt(page) ?? 1,
       limit: parseInt(limit) ?? null,
       total: dataRecipes.length,
+      total_all_data: dataRecipes?.[0]?.total_recipes ?? 0,
       data: dataRecipes
     })
   } catch (error) {
@@ -299,6 +300,7 @@ const searchRecipes = async (req, res) => {
       limit,
       page,
       total: totalData,
+      total_all_data: getData?.[0]?.total_recipes ?? 0,
       data: getData
     })
   } catch (error) {

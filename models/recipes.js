@@ -15,17 +15,26 @@ const getRecipes = async (params) => {
     // get data by user_id with sort
     if (sort) {
       return typeSort && typeSort === 'desc'
-        ? await db`SELECT recipes.*, users.* FROM recipes LEFT JOIN users ON users.id = recipes.user_id WHERE recipes.user_id = ${userId} ORDER BY ${db(
+        ? await db`SELECT (
+      SELECT COUNT(*)
+      FROM   recipes
+      ) AS total_recipes, recipes.*, users.* FROM recipes LEFT JOIN users ON users.id = recipes.user_id WHERE recipes.user_id = ${userId} ORDER BY ${db(
             sort
           )} DESC LIMIT ${limit ?? null} OFFSET ${
             page ? limit * (page - 1) : 0
           }`
-        : await db`SELECT recipes.*, users.* FROM recipes LEFT JOIN users ON users.id = recipes.user_id WHERE recipes.user_id = ${userId} ORDER BY ${db(
+        : await db`SELECT (
+      SELECT COUNT(*)
+      FROM   recipes
+      ) AS total_recipes, recipes.*, users.* FROM recipes LEFT JOIN users ON users.id = recipes.user_id WHERE recipes.user_id = ${userId} ORDER BY ${db(
             sort
           )} ASC LIMIT ${limit ?? null} OFFSET ${page ? limit * (page - 1) : 0}`
     } else {
       // get all data without sort
-      return await db`SELECT recipes.*, users.* FROM recipes LEFT JOIN users ON users.id = recipes.user_id WHERE recipes.user_id = ${userId} LIMIT ${
+      return await db`SELECT (
+      SELECT COUNT(*)
+      FROM   recipes
+      ) AS total_recipes, recipes.*, users.* FROM recipes LEFT JOIN users ON users.id = recipes.user_id WHERE recipes.user_id = ${userId} LIMIT ${
         limit ?? null
       } OFFSET ${page ? limit * (page - 1) : 0}`
     }
@@ -34,17 +43,26 @@ const getRecipes = async (params) => {
   // get all data with sort
   if (sort) {
     return typeSort && typeSort === 'desc'
-      ? await db`SELECT recipes.*, users.* FROM recipes LEFT JOIN users ON users.id = recipes.user_id ORDER BY ${db(
-          sort
-        )} DESC LIMIT ${limit ?? null} OFFSET ${page ? limit * (page - 1) : 0}`
-      : await db`SELECT recipes.*, users.* FROM recipes LEFT JOIN users ON users.id = recipes.user_id ORDER BY ${db(
-          sort
-        )} ASC LIMIT ${limit ?? null} OFFSET ${page ? limit * (page - 1) : 0}`
+      ? await db`SELECT (
+      SELECT COUNT(*)
+      FROM   recipes
+      ) AS total_recipes, recipes.*, users.* FROM recipes LEFT JOIN users ON users.id = recipes.user_id ORDER BY ${db(
+        sort
+      )} DESC LIMIT ${limit ?? null} OFFSET ${page ? limit * (page - 1) : 0}`
+      : await db`SELECT (
+      SELECT COUNT(*)
+      FROM   recipes
+      ) AS total_recipes, recipes.*, users.* FROM recipes LEFT JOIN users ON users.id = recipes.user_id ORDER BY ${db(
+        sort
+      )} ASC LIMIT ${limit ?? null} OFFSET ${page ? limit * (page - 1) : 0}`
   } else {
     // get all data without sort
-    return await db`SELECT recipes.*, users.* FROM recipes LEFT JOIN users ON users.id = recipes.user_id LIMIT ${
-      limit ?? null
-    } OFFSET ${page ? limit * (page - 1) : 0}`
+    return await db`SELECT (
+      SELECT COUNT(*)
+      FROM   recipes
+      ) AS total_recipes, recipes.*, users.* FROM recipes LEFT JOIN users ON users.id = recipes.user_id LIMIT ${
+        limit ?? null
+      } OFFSET ${page ? limit * (page - 1) : 0}`
   }
 }
 
@@ -73,21 +91,32 @@ const searchRecipes = async (params) => {
   // search data with sort
   if (sort) {
     return typeSort && typeSort === 'desc'
-      ? await db`SELECT recipes.*, users.* FROM recipes LEFT JOIN users ON users.id = recipes.user_id WHERE ${db(
-          `recipes.${searchBy}`
-        )} ILIKE ${'%' + keyword + '%'} ORDER BY ${db(sort)} DESC LIMIT ${
+      ? await db`SELECT (
+      SELECT COUNT(*)
+      FROM recipes WHERE
+      ) AS total_recipes, recipes.*, users.* FROM recipes LEFT JOIN users ON users.id = recipes.user_id WHERE ${db(
+        `recipes.${searchBy}`
+      )} ILIKE ${'%' + keyword + '%'} ORDER BY ${db(sort)} DESC LIMIT ${
           limit ?? null
         } OFFSET ${page ? limit * (page - 1) : 0}`
-      : await db`SELECT recipes.*, users.* FROM recipes LEFT JOIN users ON users.id = recipes.user_id WHERE ${db(
-          `recipes.${searchBy}`
-        )} ILIKE ${'%' + keyword + '%'} ORDER BY ${db(sort)} ASC LIMIT ${
+      : await db`SELECT (
+      SELECT COUNT(*)
+      FROM recipes WHERE 
+      ) AS total_recipes, recipes.*, users.* FROM recipes LEFT JOIN users ON users.id = recipes.user_id WHERE ${db(
+        `recipes.${searchBy}`
+      )} ILIKE ${'%' + keyword + '%'} ORDER BY ${db(sort)} ASC LIMIT ${
           limit ?? null
         } OFFSET ${page ? limit * (page - 1) : 0}`
   } else {
     // search data without
-    return await db`SELECT recipes.*, users.* FROM recipes LEFT JOIN users ON users.id = recipes.user_id WHERE ${db(
-      `recipes.${searchBy}`
-    )} ILIKE ${'%' + keyword + '%'} LIMIT ${limit ?? null} OFFSET ${
+    return await db`SELECT (
+      SELECT COUNT(*)
+      FROM recipes WHERE ${db(`recipes.${searchBy}`)} ILIKE ${
+      '%' + keyword + '%'
+    }
+      ) AS total_recipes, recipes.*, users.* FROM recipes LEFT JOIN users ON users.id = recipes.user_id WHERE ${db(
+        `recipes.${searchBy}`
+      )} ILIKE ${'%' + keyword + '%'} LIMIT ${limit ?? null} OFFSET ${
       page ? limit * (page - 1) : 0
     }`
   }

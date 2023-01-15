@@ -8,7 +8,7 @@ const getRecipes = async (params) => {
 
   // get data by id
   if (id) {
-    return await db`SELECT recipes.*, users.* FROM recipes LEFT JOIN users ON users.id = recipes.user_id WHERE recipes.id = ${id}`
+    return await db`SELECT recipes.*, users.name as user_name, users.email as user_email FROM recipes LEFT JOIN users ON users.id = recipes.user_id WHERE recipes.id = ${id}`
   }
 
   if (userId) {
@@ -18,7 +18,7 @@ const getRecipes = async (params) => {
         ? await db`SELECT (
       SELECT COUNT(*)
       FROM   recipes
-      ) AS total_recipes, recipes.*, users.* FROM recipes LEFT JOIN users ON users.id = recipes.user_id WHERE recipes.user_id = ${userId} ORDER BY ${db(
+      ) AS total_recipes, recipes.*, users.name as user_name, users.email as user_email FROM recipes LEFT JOIN users ON users.id = recipes.user_id WHERE recipes.user_id = ${userId} ORDER BY ${db(
             sort
           )} DESC LIMIT ${limit ?? null} OFFSET ${
             page ? limit * (page - 1) : 0
@@ -26,7 +26,7 @@ const getRecipes = async (params) => {
         : await db`SELECT (
       SELECT COUNT(*)
       FROM   recipes
-      ) AS total_recipes, recipes.*, users.* FROM recipes LEFT JOIN users ON users.id = recipes.user_id WHERE recipes.user_id = ${userId} ORDER BY ${db(
+      ) AS total_recipes, recipes.*, users.name as user_name, users.email as user_email FROM recipes LEFT JOIN users ON users.id = recipes.user_id WHERE recipes.user_id = ${userId} ORDER BY ${db(
             sort
           )} ASC LIMIT ${limit ?? null} OFFSET ${page ? limit * (page - 1) : 0}`
     } else {
@@ -34,7 +34,7 @@ const getRecipes = async (params) => {
       return await db`SELECT (
       SELECT COUNT(*)
       FROM   recipes
-      ) AS total_recipes, recipes.*, users.* FROM recipes LEFT JOIN users ON users.id = recipes.user_id WHERE recipes.user_id = ${userId} LIMIT ${
+      ) AS total_recipes, recipes.*, users.name as user_name, users.email as user_email FROM recipes LEFT JOIN users ON users.id = recipes.user_id WHERE recipes.user_id = ${userId} LIMIT ${
         limit ?? null
       } OFFSET ${page ? limit * (page - 1) : 0}`
     }
@@ -46,13 +46,13 @@ const getRecipes = async (params) => {
       ? await db`SELECT (
       SELECT COUNT(*)
       FROM recipes
-      ) AS total_recipes, recipes.*, users.* FROM recipes LEFT JOIN users ON users.id = recipes.user_id ORDER BY recipes.${db(
+      ) AS total_recipes, recipes.*, users.name as user_name, users.email as user_email FROM recipes LEFT JOIN users ON users.id = recipes.user_id ORDER BY recipes.${db(
         sort
       )} DESC LIMIT ${limit ?? null} OFFSET ${page ? limit * (page - 1) : 0}`
       : await db`SELECT (
       SELECT COUNT(*)
       FROM   recipes
-      ) AS total_recipes, recipes.*, users.* FROM recipes LEFT JOIN users ON users.id = recipes.user_id ORDER BY recipes.${db(
+      ) AS total_recipes, recipes.*, users.name as user_name, users.email as user_email FROM recipes LEFT JOIN users ON users.id = recipes.user_id ORDER BY recipes.${db(
         sort
       )} ASC LIMIT ${limit ?? null} OFFSET ${page ? limit * (page - 1) : 0}`
   } else {
@@ -60,7 +60,7 @@ const getRecipes = async (params) => {
     return await db`SELECT (
       SELECT COUNT(*)
       FROM   recipes
-      ) AS total_recipes, recipes.*, users.* FROM recipes LEFT JOIN users ON users.id = recipes.user_id LIMIT ${
+      ) AS total_recipes, recipes.*, users.name as user_name, users.email as user_email FROM recipes LEFT JOIN users ON users.id = recipes.user_id LIMIT ${
         limit ?? null
       } OFFSET ${page ? limit * (page - 1) : 0}`
   }
@@ -94,7 +94,7 @@ const searchRecipes = async (params) => {
       ? await db`SELECT (
       SELECT COUNT(*)
       FROM recipes WHERE
-      ) AS total_recipes, recipes.*, users.* FROM recipes LEFT JOIN users ON users.id = recipes.user_id WHERE ${db(
+      ) AS total_recipes, recipes.*, users.name as user_name, users.email as user_email FROM recipes LEFT JOIN users ON users.id = recipes.user_id WHERE ${db(
         `recipes.${searchBy}`
       )} ILIKE ${'%' + keyword + '%'} ORDER BY ${db(sort)} DESC LIMIT ${
           limit ?? null
@@ -102,7 +102,7 @@ const searchRecipes = async (params) => {
       : await db`SELECT (
       SELECT COUNT(*)
       FROM recipes WHERE 
-      ) AS total_recipes, recipes.*, users.* FROM recipes LEFT JOIN users ON users.id = recipes.user_id WHERE ${db(
+      ) AS total_recipes, recipes.*, users.name as user_name, users.email as user_email FROM recipes LEFT JOIN users ON users.id = recipes.user_id WHERE ${db(
         `recipes.${searchBy}`
       )} ILIKE ${'%' + keyword + '%'} ORDER BY ${db(sort)} ASC LIMIT ${
           limit ?? null
@@ -114,7 +114,7 @@ const searchRecipes = async (params) => {
       FROM recipes WHERE ${db(`recipes.${searchBy}`)} ILIKE ${
       '%' + keyword + '%'
     }
-      ) AS total_recipes, recipes.*, users.* FROM recipes LEFT JOIN users ON users.id = recipes.user_id WHERE ${db(
+      ) AS total_recipes, recipes.*, users.name as user_name, users.email as user_email FROM recipes LEFT JOIN users ON users.id = recipes.user_id WHERE ${db(
         `recipes.${searchBy}`
       )} ILIKE ${'%' + keyword + '%'} LIMIT ${limit ?? null} OFFSET ${
       page ? limit * (page - 1) : 0

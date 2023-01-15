@@ -28,7 +28,8 @@ const login = async (req, res) => {
     res.status(200).json({
       status: true,
       message: 'Login is successfully!',
-      jwt_token: token
+      jwt_token: token,
+      data: getUsers[0]
     })
   } catch (error) {
     res.status(error?.statusCode ?? 500).json({

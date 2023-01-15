@@ -45,14 +45,14 @@ const getRecipes = async (params) => {
     return typeSort && typeSort === 'desc'
       ? await db`SELECT (
       SELECT COUNT(*)
-      FROM   recipes
-      ) AS total_recipes, recipes.*, users.* FROM recipes LEFT JOIN users ON users.id = recipes.user_id ORDER BY ${db(
+      FROM recipes
+      ) AS total_recipes, recipes.*, users.* FROM recipes LEFT JOIN users ON users.id = recipes.user_id ORDER BY recipes.${db(
         sort
       )} DESC LIMIT ${limit ?? null} OFFSET ${page ? limit * (page - 1) : 0}`
       : await db`SELECT (
       SELECT COUNT(*)
       FROM   recipes
-      ) AS total_recipes, recipes.*, users.* FROM recipes LEFT JOIN users ON users.id = recipes.user_id ORDER BY ${db(
+      ) AS total_recipes, recipes.*, users.* FROM recipes LEFT JOIN users ON users.id = recipes.user_id ORDER BY recipes.${db(
         sort
       )} ASC LIMIT ${limit ?? null} OFFSET ${page ? limit * (page - 1) : 0}`
   } else {

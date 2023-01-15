@@ -39,6 +39,8 @@ const getRecipes = async (req, res) => {
       message = 'Data not found!'
     }
 
+    const total_all_data = dataRecipes?.[0]?.total_recipes ?? 0
+
     // store data to redis for 10 seconds
     connectRedis.set('url', req.originalUrl, 'ex', 10)
     connectRedis.set('data', JSON.stringify(dataRecipes), 'ex', 10)
@@ -46,6 +48,8 @@ const getRecipes = async (req, res) => {
     if (typeSort) connectRedis.set('typeSort', typeSort, 'ex', 10)
     if (page) connectRedis.set('page', page ?? 1, 'ex', 10)
     if (limit) connectRedis.set('limit', limit, 'ex', 10)
+    if (total_all_data)
+      connectRedis.set('total_all_data', total_all_data, 'ex', 10)
 
     res.status(statusCode ?? 200).json({
       status: true,
@@ -55,7 +59,7 @@ const getRecipes = async (req, res) => {
       page: parseInt(page) ?? 1,
       limit: parseInt(limit) ?? null,
       total: dataRecipes.length,
-      total_all_data: dataRecipes?.[0]?.total_recipes ?? 0,
+      total_all_data: total_all_data,
       data: dataRecipes
     })
   } catch (error) {

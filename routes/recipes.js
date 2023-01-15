@@ -4,15 +4,9 @@ const recipesValidation = require('../middlewares/recipesValidation')
 const { useRedis } = require('../middlewares/redis')
 const validateToken = require('../middlewares/tokenValidation')
 
-router.get(
-  '/:id?',
-  validateToken.tokenValidate,
-  useRedis,
-  recipesController.getRecipes
-)
+router.get('/:id?', useRedis, recipesController.getRecipes)
 router.get(
   '/data/search',
-  validateToken.tokenValidate,
   recipesValidation.validateSearch,
   recipesController.searchRecipes
 )

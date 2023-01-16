@@ -125,7 +125,7 @@ const editUsers = async (req, res) => {
     }
 
     // update data users
-    await users.editUsers({
+    const dataUpdate = await users.editUsers({
       id,
       name: name ?? getUser[0].name,
       email: email ?? getUser[0].email,
@@ -136,6 +136,7 @@ const editUsers = async (req, res) => {
 
     // return response
     res.status(200).json({
+      data: dataUpdate,
       status: true,
       message: 'Data is successfully updated!'
     })

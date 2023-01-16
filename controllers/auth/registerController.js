@@ -9,8 +9,15 @@ const { uploadCloudinary } = require('../../utils/cloudinary')
 // register users
 const register = async (req, res) => {
   try {
-    const { name, email, phone, password } = req.body
+    const { name, email, phone, password, matchPassword } = req.body
     const saltRounds = 10
+
+    if (password !== matchPassword) {
+      throw {
+        statusCode: 400,
+        message: 'Password must be match with second password!'
+      }
+    }
 
     // validating email is exist
     const checkEmail = await users.getUsers({ email })

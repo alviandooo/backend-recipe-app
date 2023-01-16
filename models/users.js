@@ -44,7 +44,7 @@ const createUsers = async (params) => {
 
 const editUsers = async (params) => {
   const { id, name, email, password, phone, photo } = params
-  return await db`UPDATE users SET "name"= ${name}, "email"= ${email}, "phone"= ${phone}, "password"= ${password}, "photo"= ${photo}, "updated_at"= ${updatedAt} WHERE id=${id}`
+  return await db`UPDATE users SET "name"= ${name}, "email"= ${email}, "phone"= ${phone}, "password"= ${password}, "photo"= ${photo}, "updated_at"= ${updatedAt} WHERE id=${id} RETURNING *`
 }
 
 const deleteUsers = async (params) => {

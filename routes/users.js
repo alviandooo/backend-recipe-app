@@ -15,6 +15,7 @@ router.get(
 router.patch(
   '/edit/:id',
   validateToken.tokenValidate,
+  userValidation.validateUpdate,
   userValidation.checkUser,
   userController.editUsers
 )

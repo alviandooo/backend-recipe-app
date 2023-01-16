@@ -75,7 +75,7 @@ const createRecipes = async (params) => {
 // update recipes
 const editRecipes = async (params) => {
   const { id, title, description, ingredients, photo } = params
-  return await db`UPDATE recipes SET "title"=${title}, "description"=${description}, "ingredients"=${ingredients}, "photo"=${photo}, "updated_at"=${updatedAt} WHERE id=${id}`
+  return await db`UPDATE recipes SET "title"=${title}, "description"=${description}, "ingredients"=${ingredients}, "photo"=${photo}, "updated_at"=${updatedAt} WHERE id=${id} RETURNING *`
 }
 
 // delete recipes

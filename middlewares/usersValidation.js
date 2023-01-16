@@ -28,6 +28,28 @@ const validateCreate = async (req, res, next) => {
   })
 }
 
+const validateUpdate = async (req, res, next) => {
+  const rules = new Validator(req.body, {
+    name: 'required|minLength:4|maxLength:30'
+  })
+
+  rules.check().then((matched) => {
+    if (matched) {
+      next()
+    } else {
+      res.status(400).json({
+        status: false,
+        message:
+          rules.errors?.name?.message ??
+          rules.errors?.email?.message ??
+          rules.errors?.password?.message ??
+          rules.errors?.phone?.message,
+        data: []
+      })
+    }
+  })
+}
+
 const checkUser = async (req, res, next) => {
   try {
     // get token from header authorization
@@ -61,4 +83,4 @@ const checkUser = async (req, res, next) => {
   }
 }
 
-module.exports = { validateCreate, checkUser }
+module.exports = { validateCreate, checkUser, validateUpdate }

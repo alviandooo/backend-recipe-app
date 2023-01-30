@@ -308,6 +308,7 @@ const searchRecipes = async (req, res) => {
       data: getData
     })
   } catch (error) {
+    console.log(error)
     res.status(error?.statusCode ?? 500).json({
       status: false,
       message: error?.message ?? error

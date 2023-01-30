@@ -87,28 +87,32 @@ const deleteRecipes = async (params) => {
 // search recipes
 const searchRecipes = async (params) => {
   const { searchBy, keyword, limit, page, sort, typeSort } = params
-
   // search data with sort
   if (sort) {
+    // descending
     return typeSort && typeSort === 'desc'
       ? await db`SELECT (
-      SELECT COUNT(*)
-      FROM recipes WHERE
-      ) AS total_recipes, recipes.*, users.name as user_name, users.email as user_email FROM recipes LEFT JOIN users ON users.id = recipes.user_id WHERE ${db(
-        `recipes.${searchBy}`
-      )} ILIKE ${'%' + keyword + '%'} ORDER BY ${db(sort)} DESC LIMIT ${
+        SELECT COUNT(*)
+        FROM recipes WHERE ${db(`recipes.${searchBy}`)} ILIKE ${
+          '%' + keyword + '%'
+        }
+        ) AS total_recipes, recipes.*, users.name as user_name, users.email as user_email FROM recipes LEFT JOIN users ON users.id = recipes.user_id WHERE ${db(
+          `recipes.${searchBy}`
+        )} ILIKE ${'%' + keyword + '%'} ORDER BY ${db(sort)} DESC LIMIT ${
           limit ?? null
         } OFFSET ${page ? limit * (page - 1) : 0}`
       : await db`SELECT (
-      SELECT COUNT(*)
-      FROM recipes WHERE 
-      ) AS total_recipes, recipes.*, users.name as user_name, users.email as user_email FROM recipes LEFT JOIN users ON users.id = recipes.user_id WHERE ${db(
-        `recipes.${searchBy}`
-      )} ILIKE ${'%' + keyword + '%'} ORDER BY ${db(sort)} ASC LIMIT ${
+        SELECT COUNT(*)
+        FROM recipes WHERE ${db(`recipes.${searchBy}`)} ILIKE ${
+          '%' + keyword + '%'
+        }
+        ) AS total_recipes, recipes.*, users.name as user_name, users.email as user_email FROM recipes LEFT JOIN users ON users.id = recipes.user_id WHERE ${db(
+          `recipes.${searchBy}`
+        )} ILIKE ${'%' + keyword + '%'} ORDER BY ${db(sort)} ASC LIMIT ${
           limit ?? null
         } OFFSET ${page ? limit * (page - 1) : 0}`
   } else {
-    // search data without
+    // search data without sort
     return await db`SELECT (
       SELECT COUNT(*)
       FROM recipes WHERE ${db(`recipes.${searchBy}`)} ILIKE ${

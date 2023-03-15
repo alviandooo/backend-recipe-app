@@ -25,7 +25,7 @@ const getComments = async (params) => {
           )} ASC LIMIT ${limit ?? null} OFFSET ${page ? limit * (page - 1) : 0}`
     } else {
       // get all data without sort
-      return await db`SELECT * FROM comments WHERE recipe_id = ${recipeId} LIMIT ${
+      return await db`SELECT * FROM comments WHERE recipe_id = ${recipeId} ORDER BY created_at DESC LIMIT ${
         limit ?? null
       } OFFSET ${page ? limit * (page - 1) : 0}`
     }

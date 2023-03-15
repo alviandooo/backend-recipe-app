@@ -1,6 +1,7 @@
 const recipes = require('../models/recipes')
 const users = require('../models/users')
 const recipeVideos = require('../models/recipeVideos')
+const comments = require('../models/comments')
 const path = require('path')
 const { v4: uuidv4 } = require('uuid')
 const { connectRedis } = require('../middlewares/redis')
@@ -14,13 +15,20 @@ const getRecipes = async (req, res) => {
     const statusCode = 200
     let message
     let dataRecipes = []
+    let commentsRecipes = []
+    let videos = []
 
     const { id } = req.params // get parameter id
     const { userId, limit, page, sort, typeSort } = req.query // ?limit=&page=&sort=&typeSort=
 
     if (id) {
-      // get by id
+      // get recipe by recipe id
       dataRecipes = await recipes.getRecipes({ id })
+      // get comments by recipe id
+      commentsRecipes = await comments.getComments({ recipeId: id })
+      // get videos by recipe id
+      videos = await recipeVideos.getVideos({ recipeId: 1 })
+      console.log(videos)
     } else if (userId) {
       // get by user_id
       dataRecipes = await recipes.getRecipes({
@@ -42,14 +50,16 @@ const getRecipes = async (req, res) => {
     const total_all_data = dataRecipes?.[0]?.total_recipes ?? 0
 
     // store data to redis for 10 seconds
-    connectRedis.set('url', req.originalUrl, 'ex', 10)
-    connectRedis.set('data', JSON.stringify(dataRecipes), 'ex', 10)
-    if (sort) connectRedis.set('sort', sort, 'ex', 10)
-    if (typeSort) connectRedis.set('typeSort', typeSort, 'ex', 10)
-    if (page) connectRedis.set('page', page ?? 1, 'ex', 10)
-    if (limit) connectRedis.set('limit', limit, 'ex', 10)
-    if (total_all_data)
-      connectRedis.set('total_all_data', total_all_data, 'ex', 10)
+    if (!id) {
+      connectRedis.set('url', req.originalUrl, 'ex', 10)
+      connectRedis.set('data', JSON.stringify(dataRecipes), 'ex', 10)
+      if (sort) connectRedis.set('sort', sort, 'ex', 10)
+      if (typeSort) connectRedis.set('typeSort', typeSort, 'ex', 10)
+      if (page) connectRedis.set('page', page ?? 1, 'ex', 10)
+      if (limit) connectRedis.set('limit', limit, 'ex', 10)
+      if (total_all_data)
+        connectRedis.set('total_all_data', total_all_data, 'ex', 10)
+    }
 
     res.status(statusCode ?? 200).json({
       status: true,
@@ -60,7 +70,9 @@ const getRecipes = async (req, res) => {
       limit: parseInt(limit) ?? null,
       total: dataRecipes.length,
       total_all_data: total_all_data,
-      data: dataRecipes
+      data: dataRecipes,
+      comments: commentsRecipes,
+      videos: videos
     })
   } catch (error) {
     res.status(error?.statusCode ?? 500).json({

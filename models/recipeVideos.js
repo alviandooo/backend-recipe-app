@@ -15,22 +15,21 @@ const getVideos = async (params) => {
     // get data by recipe_id with sort
     if (sort) {
       return typeSort && typeSort === 'desc'
-        ? await db`SELECT recipe_videos.*, recipes.* FROM recipe_videos LEFT JOIN recipes ON recipes.id = recipe_videos.recipe_id WHERE recipe_videos.id = ${recipeId} ORDER BY ${db(
+        ? await db`SELECT recipe_videos.*, recipes.* FROM recipe_videos LEFT JOIN recipes ON recipes.id = recipe_videos.recipe_id WHERE recipe_videos.recipe_id = ${recipeId} ORDER BY ${db(
             sort
           )} DESC LIMIT ${limit ?? null} OFFSET ${
             page ? limit * (page - 1) : 0
           }`
-        : await db`SELECT recipe_videos.*, recipes.* FROM recipe_videos LEFT JOIN recipes ON recipes.id = recipe_videos.recipe_id WHERE recipe_videos.id = ${recipeId} ORDER BY ${db(
+        : await db`SELECT recipe_videos.*, recipes.* FROM recipe_videos LEFT JOIN recipes ON recipes.id = recipe_videos.recipe_id WHERE recipe_videos.recipe_id = ${recipeId} ORDER BY ${db(
             sort
           )} ASC LIMIT ${limit ?? null} OFFSET ${page ? limit * (page - 1) : 0}`
     } else {
       // get all data without sort
-      return await db`SELECT recipe_videos.*, recipes.* FROM recipe_videos LEFT JOIN recipes ON recipes.id = recipe_videos.recipe_id WHERE recipe_videos.id = ${recipeId} LIMIT ${
+      return await db`SELECT recipe_videos.*, recipes.* FROM recipe_videos LEFT JOIN recipes ON recipes.id = recipe_videos.recipe_id WHERE recipe_videos.recipe_id = ${recipeId} ORDER BY recipes.id DESC LIMIT ${
         limit ?? null
       } OFFSET ${page ? limit * (page - 1) : 0}`
     }
   }
-
   // get all data with sort
   if (sort) {
     return typeSort && typeSort === 'desc'

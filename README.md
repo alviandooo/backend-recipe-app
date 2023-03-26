@@ -1,5 +1,9 @@
 # Backend-recipe-app
 
+## Documentation
+
+Check this url for full documentation of enpoints ( REST API ) : https://documenter.getpostman.com/view/14553040/2s93RNzFaB
+
 ## Description
 
 backend-recipe-app is endpoints of Recipe-app that can help users to find or sharing about food recipes. The app is built using Express JS & PostgreSQL.
